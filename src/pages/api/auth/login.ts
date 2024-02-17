@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import redis from '@umami/redis-client';
 import debug from 'debug';
 import { saveAuth } from 'lib/auth';
@@ -49,7 +50,16 @@ export default async (
   if (req.method === 'POST') {
     const { username, password } = req.body;
 
+    console.log({ username, password });
+
     const user = await getUserByUsername(username, { includePassword: true });
+
+    console.log('user = ', user);
+
+    console.log(
+      'checkPassword(password, user.password) - ',
+      checkPassword(password, user.password),
+    );
 
     if (user && checkPassword(password, user.password)) {
       if (redis.enabled) {
@@ -60,6 +70,8 @@ export default async (
 
       const token = createSecureToken({ userId: user.id }, secret());
       const { id, username, role, createdAt } = user;
+
+      console.log('username - ', { username, user });
 
       return ok(res, {
         token,
